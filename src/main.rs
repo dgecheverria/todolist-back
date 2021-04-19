@@ -5,12 +5,13 @@ mod db;
 
 use crate::models::{ResultResponse};
 use crate::handlers::*;
-use actix_web::{middleware, web, get, put, App, HttpServer, Responder,HttpResponse};
+use actix_web::{web, get, put, App, HttpServer, Responder,HttpResponse};
 use std::io;
 use dotenv::dotenv;
 use tokio_postgres::NoTls;
 use deadpool_postgres::{Pool,Client};
 use std::io::ErrorKind::Other;
+use actix_cors::Cors;
 
 //Services
 
@@ -73,7 +74,7 @@ async fn main() -> io::Result<()> {
     HttpServer::new( move || {
         App::new()
             .data(pool.clone())
-            .wrap(middleware::Logger::default())
+            .wrap(Cors::new().allowed_origin("http://localhost:4200").finish())
             .route("/", web::get().to(status))
             .route("/todos{_:/?}",web::get().to(get_todos))//List all list of task
             .route("/todos{_:/?}",web::post().to(create_todo))// Create a new list
