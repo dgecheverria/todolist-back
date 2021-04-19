@@ -35,6 +35,22 @@ pub async fn get_items(client: &Client, list_id: i32) -> Result<Vec<TodoItem>, i
     Ok(items)
 }
 
+pub async fn get_item_by_id(client: &Client, list_id: i32, item_id: i32) -> Result<Vec<TodoItem>, io::Error> {
+    
+    let statement = client.prepare("select * from todo_item where list_id = $1 and id = $2")
+        .await
+        .unwrap();
+
+    let item = client.query(&statement, &[&list_id,&item_id])
+        .await
+        .expect("Error getting todo item")
+        .iter()
+        .map(|row| TodoItem::from_row_ref(row).unwrap())
+        .collect::<Vec<TodoItem>>();
+
+    Ok(item)
+}
+
 pub async fn create_todo(client: &Client, title: String) -> Result<TodoList, io::Error> {
     
     let statement = client.prepare("insert into todo_list (title) values ($1) returning id, title")
