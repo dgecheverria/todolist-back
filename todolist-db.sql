@@ -14,6 +14,6 @@ create table todo_item (
     foreign key (list_id) references todo_list(id)
 );
 
-insert into todo_list (title) values ('List 1'), ('List 2');
+insert into todo_list (title) values ('Mi Lista de Tareas');
 insert into todo_item (title, list_id) 
-    values ('Task 1', 1), ('Task 2', 1), ('Task 3', 2);
+    values ('Hacer Ejercicio', 1), ('Leer un Libro', 1), ('Practicar Ingles realizar tareas', 1), ('Revisar Email', 1);

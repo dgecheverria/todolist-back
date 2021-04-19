@@ -3,9 +3,9 @@ mod models;
 mod handlers;
 mod db;
 
-use crate::models::{ResultResponse};
+use crate::models::{ResultResponse,CreateTodoItem};
 use crate::handlers::*;
-use actix_web::{web, get, put, App, HttpServer, Responder,HttpResponse};
+use actix_web::{web, get, put, post, App, HttpServer, Responder,HttpResponse};
 use std::io;
 use dotenv::dotenv;
 use tokio_postgres::NoTls;
@@ -37,6 +37,20 @@ async fn get_items_by_list(db_pool: web::Data<Pool>,web::Path(list_id): web::Pat
     db_pool.get().await.expect("Error to connect with the database");
 
     let result = db::get_items(&client, list_id ).await;
+
+    match result{
+        Ok(items) => HttpResponse::Ok().json(items),
+        Err(_) => HttpResponse::InternalServerError().into()
+    } 
+}
+
+#[post("/todos/{list_id}/item")] // <- define path 
+async fn create_item(db_pool: web::Data<Pool>,web::Path(list_id): web::Path<i32>,json: web::Json<CreateTodoItem>) -> impl Responder {
+
+    let client: Client = 
+    db_pool.get().await.expect("Error to connect with the database");
+
+    let result = db::create_item(&client, list_id ,json.title.clone()).await;
 
     match result{
         Ok(items) => HttpResponse::Ok().json(items),
@@ -78,6 +92,7 @@ async fn main() -> io::Result<()> {
             .route("/", web::get().to(status))
             .route("/todos{_:/?}",web::get().to(get_todos))//List all list of task
             .route("/todos{_:/?}",web::post().to(create_todo))// Create a new list
+            .service(create_item)//Create item
             .service(get_items_by_list)//Get all items by List
             .service(check_item_list)//Check Task
             .service(get_item_by_id)//Get a item by id

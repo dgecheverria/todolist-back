@@ -34,3 +34,4 @@ pub async fn status() -> impl Responder{
         Err(_) => HttpResponse::InternalServerError().into()
     }
 }
+
