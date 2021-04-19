@@ -22,6 +22,20 @@ pub async fn status() -> impl Responder{
 
  }
 
+/*  pub async fn get_items_complete(db_pool: web::Data<Pool>) -> impl Responder{
+
+    let client: Client = 
+        db_pool.get().await.expect("Error to connect with the database");
+
+    let result = db::get_items_complete(&client).await;
+
+    match result{
+        Ok(todos) => HttpResponse::Ok().json(todos),
+        Err(_) => HttpResponse::InternalServerError().into()
+    }
+
+ } */
+
  pub async fn create_todo(db_pool: web::Data<Pool>, json: web::Json<CreateTodoList>) -> impl Responder{
     let client: Client = 
         db_pool.get().await.expect("Error to connect with the database");

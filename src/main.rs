@@ -30,6 +30,21 @@ async fn get_item_by_id(db_pool: web::Data<Pool>,web::Path((list_id, item_id)): 
 }
 
 
+#[get("/todos/{list_id}/complete")] // <- define path 
+async fn get_complete_item_by_id(db_pool: web::Data<Pool>,web::Path(list_id): web::Path<i32>) -> impl Responder {
+
+    let client: Client = 
+    db_pool.get().await.expect("Error to connect with the database");
+
+    let result = db::get_items_complete(&client, list_id).await;
+
+    match result{
+        Ok(items) => HttpResponse::Ok().json(items),
+        Err(_) => HttpResponse::InternalServerError().into()
+    } 
+}
+
+
 #[get("/todos/{list_id}/items")] // <- define path 
 async fn get_items_by_list(db_pool: web::Data<Pool>,web::Path(list_id): web::Path<i32>) -> impl Responder {
 
@@ -96,6 +111,7 @@ async fn main() -> io::Result<()> {
             .service(get_items_by_list)//Get all items by List
             .service(check_item_list)//Check Task
             .service(get_item_by_id)//Get a item by id
+            .service(get_complete_item_by_id)
 
     })
     .bind(format!("{}:{}", config.server.host, config.server.port))?
